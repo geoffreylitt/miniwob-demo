@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)http://alpha.openai.com/miniwob/preview/miniwob/enter-text-2.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Enter Text Task</title>
+
+<!-- stylesheets -->
+<link rel="stylesheet" type="text/css" href="./enter-text-2_files/core.css">
+<style>
+input { width: 100px; }
+</style>
+
+<!-- JS -->
+<script src="./enter-text-2_files/core.js"></script>
+<script src="./enter-text-2_files/d3.v3.min.js"></script>
+<script src="./enter-text-2_files/ui_utils.js"></script>
+
+<script>
+var randomizeInputs = function(){
+  // move the text field around
+  var s = '';
+  s += 'margin-left:'+core.randi(0,20)+'px;';
+  s += 'margin-top:'+core.randi(0,20)+'px;';
+  d3.select('#form').attr('style', s);
+
+  // and submit button a bit too
+  d3.select('#subbtn').attr('style', 'margin-top:'+core.randi(0,20)+'px;');
+}
+
+var chooseText = function(){
+  var q = core.sample(ui_utils.FIFTY_NAMES);
+  var capitalize = Math.floor(Math.random(0,1)*2) === 1;
+  if(capitalize){
+    var expectedQ = q.toUpperCase();
+    q = q.toLowerCase();
+    var queryText = 'all upper case letters';
+  } else {
+    var expectedQ = q.toLowerCase();
+    q = q.toUpperCase();
+    var queryText = 'all lower case letters';
+  }
+  return {query: q, queryText: queryText, expectedText: expectedQ};
+}
+
+var bindClickEvent = function(expectedText){
+  d3.select('#subbtn').on('click', function(){
+    var t = d3.select('#tt')[0][0].value;
+    var r = t === expectedText ? 1.0 : -1.0;
+    core.endEpisode(r, r > 0);
+  });
+}
+
+var genProblem = function() {
+  d3.select('#tt')[0][0].value ='';
+
+  randomizeInputs();
+  var problemSet = chooseText();
+
+  d3.select('#query').html('Type "<span class="bold">' + problemSet.query + '</span>" in ' + problemSet.queryText + ' in the text input and press Submit.');
+  bindClickEvent(problemSet.expectedText);
+}
+
+window.onload = function() {
+  genProblem(); // start things off on load immediately
+  core.startEpisode();
+}
+</script>
+<style id="style-1-cropbar-clipper">/* Copyright 2014 Evernote Corporation. All rights reserved. */
+.en-markup-crop-options {
+    top: 18px !important;
+    left: 50% !important;
+    margin-left: -100px !important;
+    width: 200px !important;
+    border: 2px rgba(255,255,255,.38) solid !important;
+    border-radius: 4px !important;
+}
+
+.en-markup-crop-options div div:first-of-type {
+    margin-left: 0px !important;
+}
+</style></head>
+<body>
+<div id="wrap">
+  <div id="query">Type "<span class="bold">TRUMAN</span>" in all lower case letters in the text input and press Submit.</div>
+  <div id="area">
+    <div id="form" style="margin-left:1px;margin-top:5px;">
+      <input type="text" id="tt">
+      <button id="subbtn" class="secondary-action" style="margin-top:13px;">Submit</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="reward-display">
+  <div id="reward-hide" onclick="core.hideDisplay();">X</div>
+  <div class="info">
+    <label>Last reward:</label>
+    <span id="reward-last" style="color: rgb(255,0,0);">-1.00</span>
+  </div>
+  <div class="info">
+    <label>Last 10 average:</label>
+    <span id="reward-avg" style="color: rgb(255,0,0);">-1.00</span>
+  </div>
+  <div class="info">
+    <label>Time left:</label>
+    <span id="timer-countdown" style="color:yellow">7 / 10sec</span>
+  </div>
+</div></body></html>
