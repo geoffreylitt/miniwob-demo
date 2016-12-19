@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Restaurant Order Task</title>
+<!-- stylesheets -->
+<link rel="stylesheet" type="text/css" href="./restaurant-order_files/core.css">
+<!-- JS -->
+<script src="./restaurant-order_files/core.js"></script>
+<script src="./restaurant-order_files/jquery.js"></script>
+<script src="./restaurant-order_files/ui_utils.js"></script>
+<script src="./restaurant-order_files/menu-items.js"></script>
+
+<style>
+#menu { height: 150px; width: 155px; overflow-y: scroll; }
+
+.menu-category h1 { font-size: 12px; }
+
+.menu-item { float: left; width: 100%; overflow: hidden; margin-bottom: 10px; }
+.menu-item .item-info { float: left; width: 75%;}
+.menu-item .order-item { float: right; width: 25%; }
+</style>
+
+<script>
+core.EPISODE_MAX_TIME = 15000;
+
+// Picks random items for each menu category, adds random prices.
+// Returns the selected items and prices organized by category.
+var generateMenuItems = function () {
+  var output = {};
+
+  for (category in MENU_ITEMS) {
+    itemsForCategory = core.shuffle(MENU_ITEMS[category]).slice(0, 3);
+    var itemsWithPrices = itemsForCategory.map(function (itemName) {
+      return {
+        name: itemName,
+        price: core.randf(PRICES[category][0], PRICES[category][1]).toFixed(2)
+      }
+    });
+
+    output[category] = itemsWithPrices;
+  }
+
+  return output;
+}
+
+var ITEM_TEMPLATE =
+`
+<div class="item-info">
+  <div class="item-name"></div>
+  <div class="item-description"></div>
+</div>
+<div class="order-item">
+  <div class="item-price"></div>
+  <a href="#" class="order-btn">Order</a>
+`
+
+var displayMenuItems = function () {
+  var items = generateMenuItems();
+
+  for (category in items) {
+    var categoryDiv = $("<div class='menu-category'></div>")
+    categoryDiv.append("<h1>" + category + "</h1>");
+
+    var itemsInCategory = items[category];
+
+    for (idx in itemsInCategory) {
+      var item = itemsInCategory[idx];
+
+      var itemDiv = $("<div class='menu-item'></div>")
+      $(itemDiv).html(ITEM_TEMPLATE);
+
+      $(itemDiv).find(".item-name").text(item.name);
+      $(itemDiv).find(".item-price").text("$" + item.price);
+
+      $(categoryDiv).append(itemDiv);
+    }
+
+    $('#menu').append(categoryDiv);
+  }
+}
+
+var genProblem = function(){
+  displayMenuItems();
+}
+
+window.onload = function() {
+  genProblem(); // start things off on load immediately
+  core.startEpisode();
+}
+</script>
+<style id="style-1-cropbar-clipper">/* Copyright 2014 Evernote Corporation. All rights reserved. */
+.en-markup-crop-options {
+    top: 18px !important;
+    left: 50% !important;
+    margin-left: -100px !important;
+    width: 200px !important;
+    border: 2px rgba(255,255,255,.38) solid !important;
+    border-radius: 4px !important;
+}
+
+.en-markup-crop-options div div:first-of-type {
+    margin-left: 0px !important;
+}
+</style></head>
+<body>
+
+<div id="wrap">
+  <div id="query">
+    Click Order for the <span class="bold">cheapest sandwich</span> on the menu.
+  </div>
+  <div id="area">
+    <div id="menu">
+    </div>
+  </div>
+</div>
+
+<div id="reward-display">
+  <div id="reward-hide" onclick="core.hideDisplay();">X</div>
+  <div class="info">
+    <label>Last reward:</label>
+    <span id="reward-last" style="color: rgb(255,0,0);">-1.00</span>
+  </div>
+  <div class="info">
+    <label>Last 10 average:</label>
+    <span id="reward-avg" style="color: rgb(255,0,0);">-1.00</span>
+  </div>
+  <div class="info">
+    <label>Time left:</label>
+    <span id="timer-countdown" style="color:yellow">7 / 10sec</span>
+  </div>
+</div>
+
+</body></html>
