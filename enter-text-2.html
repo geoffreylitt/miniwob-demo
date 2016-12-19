@@ -26,17 +26,28 @@ var randomizeInputs = function(){
   d3.select('#subbtn').attr('style', 'margin-top:'+core.randi(0,20)+'px;');
 }
 
+// Reverses a string, Unicode-friendly
+var reverseString = function (str) {
+  var out = "";
+  for (var i = str.length - 1; i >= 0; i--) {
+    out += str[i];
+  }
+  return out;
+}
+
 var chooseText = function(){
   var q = core.sample(ui_utils.FIFTY_NAMES);
-  var capitalize = Math.floor(Math.random(0,1)*2) === 1;
-  if(capitalize){
+  var transform = core.sample(["upcase", "downcase", "reverse"]);
+  console.log(transform);
+  if(transform === "upcase"){
     var expectedQ = q.toUpperCase();
-    q = q.toLowerCase();
-    var queryText = 'all upper case letters';
-  } else {
+    var queryText = 'in all upper case letters';
+  } else if (transform === "downcase") {
     var expectedQ = q.toLowerCase();
-    q = q.toUpperCase();
-    var queryText = 'all lower case letters';
+    var queryText = 'in all lower case letters';
+  } else {
+    var expectedQ = reverseString(q);
+    var queryText = 'in reverse order';
   }
   return {query: q, queryText: queryText, expectedText: expectedQ};
 }
@@ -55,7 +66,7 @@ var genProblem = function() {
   randomizeInputs();
   var problemSet = chooseText();
 
-  d3.select('#query').html('Type "<span class="bold">' + problemSet.query + '</span>" in ' + problemSet.queryText + ' in the text input and press Submit.');
+  d3.select('#query').html('Type "<span class="bold">' + problemSet.query + '</span>" ' + problemSet.queryText + ' in the text input and press Submit.');
   bindClickEvent(problemSet.expectedText);
 }
 
