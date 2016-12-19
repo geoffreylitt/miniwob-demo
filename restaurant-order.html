@@ -22,7 +22,12 @@
 <script>
 core.EPISODE_MAX_TIME = 15000;
 
-// Picks random items for each menu category, adds random prices.
+// Returns a random price for a given category of menu item.
+var randomPriceForCategory = function (category) {
+  return core.randf(PRICES[category][0], PRICES[category][1]);
+}
+
+// Picks random items for each menu category, and adds random prices.
 // Returns the selected items and prices organized by category.
 var generateMenuItems = function () {
   var output = {};
@@ -32,7 +37,7 @@ var generateMenuItems = function () {
     var itemsWithPrices = itemsForCategory.map(function (itemName) {
       return {
         name: itemName,
-        price: core.randf(PRICES[category][0], PRICES[category][1]).toFixed(2)
+        price: randomPriceForCategory(category)
       }
     });
 
@@ -51,11 +56,11 @@ var ITEM_TEMPLATE =
 <div class="order-item">
   <div class="item-price"></div>
   <a href="#" class="order-btn">Order</a>
+</div>
 `
 
-var displayMenuItems = function () {
-  var items = generateMenuItems();
-
+// Given a set of menu items, display them in the DOM
+var displayMenuItems = function (items) {
   for (category in items) {
     var categoryDiv = $("<div class='menu-category'></div>")
     categoryDiv.append("<h1>" + category + "</h1>");
@@ -69,7 +74,7 @@ var displayMenuItems = function () {
       $(itemDiv).html(ITEM_TEMPLATE);
 
       $(itemDiv).find(".item-name").text(item.name);
-      $(itemDiv).find(".item-price").text("$" + item.price);
+      $(itemDiv).find(".item-price").text("$" + item.price.toFixed(2));
 
       $(categoryDiv).append(itemDiv);
     }
@@ -78,8 +83,44 @@ var displayMenuItems = function () {
   }
 }
 
+// Returns the name of the correct item to click on.
+// Right now this is simply hardcoded to the cheapest sandwich.
+// In the future it could be extended to different item types,
+// or to most expensive items for the luxuriously minded.
+var getTargetItemName = function (items) {
+  var sandwiches = items["Sandwiches"];
+
+  var output = ""
+  var lowestPrice = Infinity;
+
+  for (idx in sandwiches) {
+    var item = sandwiches[idx];
+    if (item.price < lowestPrice) {
+      lowestPrice = item.price;
+      output = item.name;
+    }
+  }
+
+  return output;
+}
+
+var initClickHandlers = function (correctItemName) {
+  $("a.order-btn").click( function (e) {
+    var itemName = $(this).parents(".menu-item").find(".item-name").text();
+    var correct = (itemName === correctItemName);
+
+    var reward = correct ? 1 : -1;
+
+    core.endEpisode(reward, reward > 0);
+  });
+}
+
 var genProblem = function(){
-  displayMenuItems();
+  $("#menu").html("");
+  var items = generateMenuItems();
+  displayMenuItems(items);
+  var correctItemName = getTargetItemName(items);
+  initClickHandlers(correctItemName);
 }
 
 window.onload = function() {
